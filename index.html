@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unified Logistics Hub - Customs & Import Control Center</title>
+  
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Geometric Network Canvas Watermark -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div id="app-container">
+
+    <!-- DEDICATED LOGIN LANDING PAGE (Exact Match to User Screenshot) -->
+    <div id="login-view-pane" class="login-view-container">
+      <div class="login-card-exact">
+        
+        <div class="login-sub-tag">SIGN IN</div>
+        <h1 class="login-headline">Welcome back</h1>
+        <p class="login-subtext">Access your Unified Logistics Hub workspace.</p>
+
+        <form id="exact-login-form" onsubmit="event.preventDefault(); window.hubApp.executeLoginFlow();">
+          
+          <div class="login-field-group">
+            <label class="login-field-label">EMAIL / NIK</label>
+            <input type="text" id="login-email-input" class="login-field-input" value="remmoon@uniaircargo.co.id" required>
+          </div>
+
+          <div class="login-field-group">
+            <label class="login-field-label">PASSWORD</label>
+            <div style="position: relative;">
+              <input type="password" id="login-password-input" class="login-field-input" value="admin123" required>
+              <i class="fa-solid fa-eye-slash password-eye-toggle" id="toggle-pwd-icon" onclick="window.hubApp.togglePasswordVisibility()"></i>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-sign-in-exact">
+            SIGN IN
+          </button>
+        </form>
+
+        <div class="login-demo-badge">
+          <i class="fa-solid fa-shield-halved" style="color:var(--primary-soft-blue);"></i> UNO Portal SSO Verified &bull; NIK: <code>3174092801940003</code>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MAIN LOGISTICS HUB APP SHELL (Hidden until Sign In) -->
+    <div id="main-app-shell" style="display:none;">
+
+      <!-- Header Bar (Layer 1 & Layer 2) -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="brand-logo">
+            <i class="fa-solid fa-network-wired"></i>
+            <div class="brand-title">
+              <span>UNIFIED LOGISTICS HUB</span>
+              <span class="sub">Import Lifecycle Control Center</span>
+            </div>
+          </div>
+
+          <nav class="app-nav">
+            <button class="nav-item active" data-tab="dashboard-pane">
+              <i class="fa-solid fa-gauge-high"></i> Control Tower
+            </button>
+            <button class="nav-item" data-tab="job-mgmt-pane">
+              <i class="fa-solid fa-list-check"></i> Job Management
+            </button>
+            <button class="nav-item" data-tab="workbench-pane">
+              <i class="fa-solid fa-triangle-exclamation"></i> Exception Mgmt
+            </button>
+            <button class="nav-item" data-tab="doc-mgmt-pane">
+              <i class="fa-solid fa-file-invoice"></i> Document Mgmt
+            </button>
+            <button class="nav-item" data-tab="rpa-pane">
+              <i class="fa-solid fa-chart-line"></i> Monitoring & Health
+            </button>
+            <button class="nav-item" data-tab="hscode-pane">
+              <i class="fa-solid fa-shield-check"></i> HS Validator
+            </button>
+            <button class="nav-item" data-tab="arch-pane">
+              <i class="fa-solid fa-sitemap"></i> Solution Architecture
+            </button>
+          </nav>
+        </div>
+
+        <div class="header-right">
+          <div class="health-indicator">
+            <span class="dot-pulse"></span>
+            <span>Core Nodes: <strong>Operational (99.8%)</strong></span>
+          </div>
+
+          <button class="icon-btn-badge" title="DO Alert Notifications" onclick="window.hubApp.switchTab('dashboard-pane')">
+            <i class="fa-solid fa-bell"></i>
+            <span class="badge-count" id="header-alert-count">5</span>
+          </button>
+
+          <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.78rem;" onclick="window.mfaSimulator.startAuthFlow()">
+            <i class="fa-solid fa-key"></i> MFA Failover Test
+          </button>
+
+          <button class="btn btn-outline-danger" style="padding: 5px 10px; font-size: 0.78rem;" title="Sign Out & Lock Workspace" onclick="window.hubApp.signOut()">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </button>
+
+          <div class="user-profile-menu" onclick="window.hubApp.openEditProfileModal()">
+            <div class="avatar">RM</div>
+            <div class="user-info">
+              <span class="user-name" id="user-display-name">remmoon</span>
+              <span class="user-role" id="user-role-label">Customer Service Team</span>
+            </div>
+            <i class="fa-solid fa-gear" style="font-size: 0.8rem; color: var(--text-light); margin-left: 6px;" title="Edit Profile & NIK SSO"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Common Capabilities Toolbar (Layer 2) -->
+      <div class="common-capabilities-bar">
+        <div class="cap-group">
+          <span class="cap-item"><i class="fa-solid fa-magnifying-glass"></i> Global Search</span>
+          <span class="cap-item"><i class="fa-solid fa-bell"></i> Notifications</span>
+          <span class="cap-item"><i class="fa-solid fa-list-check"></i> Task List</span>
+          <span class="cap-item"><i class="fa-solid fa-calendar-days"></i> Calendar</span>
+          <span class="cap-item" onclick="window.hubApp.switchTab('rpa-pane')"><i class="fa-solid fa-clock-rotate-left"></i> Audit Log Viewer</span>
+          <span class="cap-item" onclick="window.hubApp.showNotification('Data Export Initiated', 'Exporting transaction dataset in JSON/CSV format...', 'info')"><i class="fa-solid fa-file-export"></i> Data Export</span>
+          <span class="cap-item" onclick="window.hubApp.switchTab('arch-pane')"><i class="fa-solid fa-sliders"></i> System Config</span>
+          <span class="cap-item" onclick="window.hubApp.switchTab('arch-pane')"><i class="fa-solid fa-circle-question"></i> Help & Support</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-light); font-weight: 500;">
+          <i class="fa-solid fa-layer-group" style="color:var(--primary-accent);"></i> Unified Data Hub Engine (Single Entry, Multiple Use)
+        </div>
+      </div>
+
+      <!-- Main Content Canvas -->
+      <main class="main-content">
+
+        <!-- TAB 1: DASHBOARD / CONTROL TOWER -->
+        <section id="dashboard-pane" class="tab-pane active">
+          
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-gauge-high" style="color: var(--primary-soft-blue);"></i> Control Tower & Operational Overview</h1>
+              <p class="page-subtitle">Real-time import lifecycle visibility across InCustoms AI, Home RPA, VPLUS, eVoucher, and TMS</p>
+            </div>
+            <div class="action-group">
+              <button class="btn btn-primary" onclick="window.hubApp.openNewShipmentModal()">
+                <i class="fa-solid fa-plus"></i> Ingest New Shipment
+              </button>
+              <button class="btn btn-secondary" onclick="window.hubApp.triggerRpaManualSync()">
+                <i class="fa-solid fa-rotate"></i> Force RPA Re-Sync
+              </button>
+              <button class="btn btn-secondary" onclick="window.hubApp.switchTab('workbench-pane')">
+                <i class="fa-solid fa-triangle-exclamation"></i> Exception Queue
+              </button>
+            </div>
+          </div>
+
+          <!-- End-to-End Automated Data Lifecycle Stepper Banner (Layer 10) -->
+          <div class="lifecycle-stepper-card">
+            <div class="stepper-header">
+              <h4><i class="fa-solid fa-arrows-spin"></i> End-to-End Automated Import Data Lifecycle</h4>
+              <span class="badge badge-success">Single Entry &rarr; Multi-Node Distribution</span>
+            </div>
+
+            <div class="stepper-flow">
+              <div class="step-box step-complete">
+                <div class="step-num">1</div>
+                <div class="step-title">Doc Ingestion & AI Parsing</div>
+                <div class="step-desc">Pre-alert webhook intake. LayoutLM parses BL, Container, HS Code to JSON.</div>
+              </div>
+              <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+              <div class="step-box step-complete">
+                <div class="step-num">2</div>
+                <div class="step-title">Rules Validation & Routing</div>
+                <div class="step-desc">Home RPA evaluates business rules & BTKI tariff compliance.</div>
+              </div>
+              <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+              <div class="step-box step-active">
+                <div class="step-num">3</div>
+                <div class="step-title">Central Ledger Inscription</div>
+                <div class="step-desc">Validated data posted to VPLUS/LOT master ledger via authenticated API.</div>
+              </div>
+              <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+              <div class="step-box step-pending">
+                <div class="step-num">4</div>
+                <div class="step-title">Synchronous Split</div>
+                <div class="step-desc">When LOT status = Finalized, RPA triggers parallel downstream APIs.</div>
+              </div>
+              <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+              <div class="step-box step-pending">
+                <div class="step-num">5A/5B</div>
+                <div class="step-title">eVoucher & TMS Execution</div>
+                <div class="step-desc">Financial voucher generated & Transport Instructions (TI) dispatched to TMS.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card card-success">
+              <div class="kpi-header">
+                <span class="kpi-title">Active Import Jobs</span>
+                <div class="kpi-icon"><i class="fa-solid fa-ship"></i></div>
+              </div>
+              <div class="kpi-value" id="kpi-total-active">6</div>
+              <div class="kpi-footer"><i class="fa-solid fa-circle-check" style="color:var(--status-success);"></i> Single Entry Tracked</div>
+            </div>
+
+            <div class="kpi-card card-warning">
+              <div class="kpi-header">
+                <span class="kpi-title">Customs Pending</span>
+                <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+              </div>
+              <div class="kpi-value" id="kpi-customs-pending">4</div>
+              <div class="kpi-footer"><i class="fa-solid fa-clock" style="color:var(--status-warning);"></i> Polled by Home RPA</div>
+            </div>
+
+            <div class="kpi-card card-success">
+              <div class="kpi-header">
+                <span class="kpi-title">Clearance Completed</span>
+                <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+              </div>
+              <div class="kpi-value" id="kpi-clearance-completed">2</div>
+              <div class="kpi-footer"><i class="fa-solid fa-truck" style="color:var(--status-success);"></i> Gate Pass & TMS Ready</div>
+            </div>
+
+            <div class="kpi-card card-danger">
+              <div class="kpi-header">
+                <span class="kpi-title">Exceptions & Holds</span>
+                <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              </div>
+              <div class="kpi-value" id="kpi-exceptions">3</div>
+              <div class="kpi-footer"><i class="fa-solid fa-bolt" style="color:var(--status-error);"></i> Requires Review</div>
+            </div>
+
+            <div class="kpi-card card-danger">
+              <div class="kpi-header">
+                <span class="kpi-title">Critical DO Alerts</span>
+                <div class="kpi-icon"><i class="fa-solid fa-bell"></i></div>
+              </div>
+              <div class="kpi-value" id="kpi-critical-alerts">2</div>
+              <div class="kpi-footer"><i class="fa-solid fa-triangle-exclamation" style="color:var(--status-error);"></i> Obstacles Flagged</div>
+            </div>
+          </div>
+
+          <!-- Proactive DO Alert Banner -->
+          <div class="do-alert-banner banner-critical">
+            <div class="alert-content">
+              <div class="alert-icon-wrap"><i class="fa-solid fa-circle-exclamation"></i></div>
+              <div class="alert-info">
+                <h4>CRITICAL DO ALERT: Customs Red Channel & Low AI Confidence Detected</h4>
+                <p>Physical inspection required on <code>JOB-2026-0891</code> at Terminal 3. Low AI confidence score (42%) on <code>JOB-2026-0895</code>.</p>
+                <div class="alert-meta">
+                  <span><i class="fa-solid fa-shield-halved"></i> Automated Customs Validation</span>
+                  <span>Source: AI InCustoms LayoutLM & VPLUS Sync</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="window.hubApp.switchTab('workbench-pane')">
+                <i class="fa-solid fa-wrench"></i> Launch Exception Workbench
+              </button>
+            </div>
+          </div>
+
+          <!-- Dashboard Main Grid: Table + Sidebar -->
+          <div class="dashboard-grid">
+            
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-table-list"></i> Real-time Shipment & Job Order Ledger</h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Node 1 (InCustoms) &rarr; Node 2 (Home RPA) &rarr; Node 3,4,5 (VPLUS/eVoucher/TMS)</span>
+              </div>
+
+              <div class="filter-toolbar">
+                <div class="search-input-wrap">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="table-search-input" placeholder="Search Job ID, Container No, B/L, Importer, HS Code...">
+                </div>
+
+                <select class="filter-select" id="table-status-filter">
+                  <option value="all">All Operational Statuses</option>
+                  <option value="pending">Customs Pending</option>
+                  <option value="cleared">Customs Cleared</option>
+                  <option value="exceptions">Exceptions / Low AI Score</option>
+                  <option value="failed_sync">Sync Failed Jobs</option>
+                </select>
+
+                <button class="btn btn-secondary" onclick="window.hubApp.renderShipmentTable()">
+                  <i class="fa-solid fa-filter"></i> Filter
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Job Order ID</th>
+                      <th>Container / B/L</th>
+                      <th>Importer & Vessel</th>
+                      <th>HS Code</th>
+                      <th>AI Conf.</th>
+                      <th>Customs Status</th>
+                      <th>5 Core System Nodes Sync Matrix</th>
+                      <th>Last Sync</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="shipment-table-body">
+                    <!-- Rendered dynamically by app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Sidebar: DO Alert Feed & System Integration Health -->
+            <div class="sidebar-panel">
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-bell" style="color: var(--status-error);"></i> DO Alert Feed</h3>
+                  <span class="badge badge-danger">5 Active</span>
+                </div>
+                <div class="alert-feed-list" id="sidebar-alert-feed">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-network-wired"></i> 5 Core System Nodes</h3>
+                </div>
+                <div class="system-node-list" id="system-node-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 2: JOB MANAGEMENT PANE -->
+        <section id="job-mgmt-pane" class="tab-pane">
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-list-check" style="color: var(--primary-soft-blue);"></i> Job Management & Tracking</h1>
+              <p class="page-subtitle">Search, filter, track real-time status, notes & DO Alerts across all active import jobs</p>
+            </div>
+            <div class="action-group">
+              <button class="btn btn-primary" onclick="window.hubApp.openNewShipmentModal()"><i class="fa-solid fa-plus"></i> Ingest New Job</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:20px;">
+            <h3 style="margin-bottom:14px;">Active Import Jobs Directory</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Select any job order to inspect full audit logs, document attachments, and multi-node sync status.</p>
+            <div id="job-mgmt-list-view">
+              <!-- Dynamically cloned shipment table -->
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: AI EXCEPTION MANAGEMENT WORKBENCH -->
+        <section id="workbench-pane" class="tab-pane">
+          
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-triangle-exclamation" style="color: var(--primary-soft-blue);"></i> Exception Management Module</h1>
+              <p class="page-subtitle">AI Exception Queue: Review & correct AI-extracted fields (LayoutLM v2.4) with field confidence scoring and audit trail</p>
+            </div>
+            <div class="action-group">
+              <span class="badge badge-warning" style="font-size: 0.85rem; padding: 8px 14px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Low AI Confidence: JOB-2026-0895 (42.1%)
+              </span>
+            </div>
+          </div>
+
+          <div class="workbench-grid">
+            
+            <!-- Document Split Viewer Left Panel -->
+            <div class="card doc-viewer-card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-file-pdf"></i> Source Document Viewer</h3>
+                <span id="wb-doc-name" class="code-pill">Commercial_Invoice_EGLV4019.pdf</span>
+              </div>
+              
+              <div class="doc-canvas-area">
+                <div class="simulated-doc-page">
+                  <div class="doc-header-text">
+                    <h2>COMMERCIAL INVOICE & PACKING LIST</h2>
+                    <p>SHENZHEN ELECTRONICS EXPORT CORP - SHENZHEN, CHINA</p>
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+                    <div>
+                      <strong>SOLD TO / IMPORTER:</strong><br>
+                      PT Nusantara Electrindo<br>
+                      Tax ID: 01.382.910.4-015.000
+                    </div>
+                    <div>
+                      <strong>INVOICE NO:</strong> INV-2026/SZ-09412<br>
+                      <strong>B/L NO:</strong> EGLV-40192831<br>
+                      <strong>DATE:</strong> August 04, 2026
+                    </div>
+                  </div>
+
+                  <table style="width:100%; border-collapse:collapse; margin-bottom: 20px; font-size: 0.7rem;">
+                    <thead>
+                      <tr style="border-bottom: 1px solid #000;">
+                        <th style="text-align:left;">Item</th>
+                        <th style="text-align:left;">Description</th>
+                        <th style="text-align:left;">HS Code</th>
+                        <th style="text-align:right;">Amount (USD)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>01</td>
+                        <td>Industrial Micro-Controller Logic Units & Display Modules</td>
+                        <td style="font-weight:700; color:var(--status-error);">847I.3O.IO</td>
+                        <td style="text-align:right;">$148,500.00</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div style="text-align:right; font-weight:700; border-top: 1px dashed #000; padding-top: 10px;">
+                    TOTAL CIF TANJUNG PRIOK: $148,500.00 USD
+                  </div>
+
+                  <!-- Bounding Box Overlays -->
+                  <div class="doc-bounding-box" id="doc-box-invoice_no" style="top: 105px; right: 25px; width: 180px; height: 25px;" title="Invoice No (99.2% Conf)"></div>
+                  <div class="doc-bounding-box" id="doc-box-bl_number" style="top: 130px; right: 25px; width: 170px; height: 25px;" title="B/L Number (98.7% Conf)"></div>
+                  <div class="doc-bounding-box highlight" id="doc-box-hs_code" style="top: 220px; left: 240px; width: 100px; height: 25px;" title="Low Confidence Field: HS Code 42.1%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fields Verification Form Right Panel -->
+            <div class="card" style="display:flex; flex-direction:column;">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-list-check"></i> Extracted Fields & Confidence Audit</h3>
+                <span class="badge badge-warning">Overall Score: <strong id="wb-overall-conf">42.1%</strong></span>
+              </div>
+
+              <div class="verification-form" id="wb-fields-list">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <!-- Audit Trail Log Footer -->
+              <div style="padding: 16px; border-top: 1px solid var(--border-light); background: var(--bg-app);">
+                <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--primary-navy); margin-bottom: 6px;">
+                  <i class="fa-solid fa-history"></i> Field Audit Trail & Synchronization History
+                </h4>
+                <div id="wb-audit-trail">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 4: DOCUMENT MANAGEMENT PANE -->
+        <section id="doc-mgmt-pane" class="tab-pane">
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-file-invoice" style="color: var(--primary-soft-blue);"></i> Document Management Module</h1>
+              <p class="page-subtitle">Pre-alert intake, AI LayoutLM extraction viewer, document validation, version history, download & export</p>
+            </div>
+            <div class="action-group">
+              <button class="btn btn-primary" onclick="window.hubApp.openNewShipmentModal()"><i class="fa-solid fa-upload"></i> Upload Pre-alert Document</button>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card" style="padding:20px;">
+              <h3>Received Pre-Alert Documents</h3>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">Documents ingested via webhook or user intake:</p>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Document Name</th>
+                    <th>Type</th>
+                    <th>Job ID</th>
+                    <th>AI Extraction Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><i class="fa-solid fa-file-pdf" style="color:var(--status-error);"></i> Commercial_Invoice_EGLV4019.pdf</td>
+                    <td>Commercial Invoice</td>
+                    <td>JOB-2026-0895</td>
+                    <td><span class="badge badge-warning">42.1% (Low Conf)</span></td>
+                    <td><button class="btn btn-secondary" onclick="window.hubApp.switchTab('workbench-pane')">Inspect AI Result</button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-file-pdf" style="color:var(--status-error);"></i> PIB_Draft_MSK98230.pdf</td>
+                    <td>PIB Declaration</td>
+                    <td>JOB-2026-0891</td>
+                    <td><span class="badge badge-success">98.4% (Verified)</span></td>
+                    <td><button class="btn btn-secondary" onclick="window.hubApp.openJobDetailModal('JOB-2026-0891')">View Details</button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-file-pdf" style="color:var(--status-error);"></i> Packing_List_COSU639.pdf</td>
+                    <td>Packing List</td>
+                    <td>JOB-2026-0899</td>
+                    <td><span class="badge badge-success">96.8% (Verified)</span></td>
+                    <td><button class="btn btn-secondary" onclick="window.hubApp.openJobDetailModal('JOB-2026-0899')">View Details</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card" style="padding:20px;">
+              <h3>Document Repository Metrics</h3>
+              <div style="margin-top:14px; font-size:0.85rem; display:flex; flex-direction:column; gap:12px;">
+                <div><strong>Storage Provider:</strong> Distributed S3 / Encrypted Vault</div>
+                <div><strong>Metadata Tracking:</strong> Immutable Hash Verification</div>
+                <div><strong>Version Control:</strong> v2.4 Active</div>
+                <div><strong>Retention Policy:</strong> 10-Year Statutory Compliance</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: HOME RPA MONITORING & REPORTING -->
+        <section id="rpa-pane" class="tab-pane">
+          
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-chart-line" style="color: var(--primary-soft-blue);"></i> Monitoring & System Health</h1>
+              <p class="page-subtitle">Pipeline health, API performance metrics, SLA & cycle time tracking, audit logs, and Home RPA orchestrator</p>
+            </div>
+            <div class="action-group">
+              <button class="btn btn-primary" onclick="window.hubApp.triggerRpaManualSync()">
+                <i class="fa-solid fa-bolt"></i> Run Automated Poller Now
+              </button>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-title">Home RPA Status</div>
+              <div class="kpi-value" style="color: var(--status-success);">Active</div>
+              <div class="kpi-footer">Polling interval: 60s</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Total Synchronizations</div>
+              <div class="kpi-value">3,890</div>
+              <div class="kpi-footer">Last 24 Hours</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Sync Success Rate</div>
+              <div class="kpi-value" style="color: var(--status-success);">99.2%</div>
+              <div class="kpi-footer">3 Retry Max Cap</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Pending Retry Jobs</div>
+              <div class="kpi-value" style="color: var(--status-warning);">1</div>
+              <div class="kpi-footer">eVoucher Timeout</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-terminal"></i> Live Event Execution Log Stream (Layer 3 & 6 API Gateway & Message Broker)</h3>
+              <span class="badge badge-info">Real-time Feed</span>
+            </div>
+            <div style="padding: 16px;" id="rpa-log-stream">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- TAB 6: AUTOMATED HS CODE VALIDATOR -->
+        <section id="hscode-pane" class="tab-pane">
+          
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-shield-check" style="color: var(--primary-soft-blue);"></i> Business Rules & HS Code Engine</h1>
+              <p class="page-subtitle">Pre-ledger validation against Indonesian BTKI 2022 tariff rules, LARTAS permit requirements, and duty calculations</p>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            
+            <div class="card" style="padding: 20px;">
+              <h3 style="font-size: 1rem; font-weight:700; margin-bottom: 16px;"><i class="fa-solid fa-calculator"></i> Customs Tariff Compliance Tester</h3>
+              
+              <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight:600; display:block; margin-bottom:4px;">Enter HS Tariff Code (8 or 10 Digits):</label>
+                <input type="text" id="tool-hs-input" class="search-input-wrap input" style="width:100%; padding:10px; border:1px solid var(--border-light); border-radius:6px; font-family:'JetBrains Mono', monospace;" value="8517.62.59">
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <label style="font-size: 0.8rem; font-weight:600; display:block; margin-bottom:4px;">Goods Description on Invoice:</label>
+                <input type="text" id="tool-desc-input" style="width:100%; padding:10px; border:1px solid var(--border-light); border-radius:6px;" value="Wireless Enterprise Optical Router Transceivers">
+              </div>
+
+              <button class="btn btn-primary btn-block" onclick="window.hubApp.runHsValidatorTool()">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Validate Against BTKI Tariff Rules
+              </button>
+
+              <div id="validator-result-card" style="margin-top: 20px;">
+                <!-- Results injected here -->
+              </div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+              <h3 style="font-size: 1rem; font-weight:700; margin-bottom: 14px;"><i class="fa-solid fa-book"></i> Indonesian BTKI Reference Library</h3>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Active tariff rules loaded into InCustoms rules engine:</div>
+              
+              <div style="display:flex; flex-direction:column; gap: 10px;">
+                <div style="background:var(--bg-app); border:1px solid var(--border-light); padding:10px; border-radius:6px; font-size:0.8rem;">
+                  <span class="code-pill">8471.30.90</span> - Portable Automatic Data Processing Machines (Laptops)<br>
+                  <span style="color:var(--status-success); font-weight:600;">LARTAS Free | BM 0% | PPN 11%</span>
+                </div>
+                <div style="background:var(--bg-app); border:1px solid var(--border-light); padding:10px; border-radius:6px; font-size:0.8rem;">
+                  <span class="code-pill">8517.62.59</span> - Wireless Transceivers & Optical Routers<br>
+                  <span style="color:var(--status-error); font-weight:600;">LARTAS Restricted (POSTEL Permit Required)</span>
+                </div>
+                <div style="background:var(--bg-app); border:1px solid var(--border-light); padding:10px; border-radius:6px; font-size:0.8rem;">
+                  <span class="code-pill">0303.89.10</span> - Frozen Mackerel Fish Fillets<br>
+                  <span style="color:var(--status-error); font-weight:600;">LARTAS Restricted (Quarantine & BKIPM Permit)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 7: FULL SOLUTION ARCHITECTURE GRAPH (Synchronized 10-Layer Replica) -->
+        <section id="arch-pane" class="tab-pane">
+          
+          <div class="page-title-bar">
+            <div>
+              <h1><i class="fa-solid fa-sitemap" style="color: var(--primary-soft-blue);"></i> Solution Architecture Blueprint</h1>
+              <p class="page-subtitle">Interactive 10-Layer Synchronization Graph: Single Entry, Multiple Use - Unified Data Hub Powered Import Lifecycle</p>
+            </div>
+          </div>
+
+          <!-- 10-Layer Interactive Architecture Diagram Container -->
+          <div class="arch-full-diagram">
+            
+            <div class="diagram-title-banner">
+              <h2>UNIFIED IMPORT CUSTOMS SOLUTION ARCHITECTURE</h2>
+              <p>Single Entry, Multiple Use &mdash; Unified Data Hub Powered Import Lifecycle</p>
+            </div>
+
+            <div class="arch-blueprint-grid">
+              
+              <!-- Main Layers Column -->
+              <div class="main-layers-column">
+                
+                <!-- LAYER 1 -->
+                <div class="layer-card">
+                  <div class="layer-badge">1. USER / ACCESS LAYER</div>
+                  <div class="layer-content-flex">
+                    <div class="role-pill-list">
+                      <span class="role-chip"><i class="fa-solid fa-user-gear"></i> All Internal Users</span>
+                      <span class="role-chip"><i class="fa-solid fa-headset"></i> Customer Service Team</span>
+                      <span class="role-chip"><i class="fa-solid fa-building-columns"></i> Customs Team</span>
+                      <span class="role-chip"><i class="fa-solid fa-sack-dollar"></i> Finance Team</span>
+                      <span class="role-chip"><i class="fa-solid fa-truck"></i> Logistics Team</span>
+                      <span class="role-chip"><i class="fa-solid fa-user-shield"></i> Operations Manager</span>
+                      <span class="role-chip"><i class="fa-solid fa-key"></i> Administrator</span>
+                      <span class="role-chip"><i class="fa-solid fa-file-contract"></i> Auditor (Read Only)</span>
+                    </div>
+                    <div class="auth-bar-inline">
+                      <span><i class="fa-solid fa-lock"></i> NIK SSO (Single Sign-On)</span> + 
+                      <span><i class="fa-solid fa-shield"></i> MFA (WhatsApp / Email Fallback)</span> + 
+                      <span><i class="fa-solid fa-users"></i> RBAC (Role Based Access Control)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LAYER 2 -->
+                <div class="layer-card">
+                  <div class="layer-badge">2. UNIFIED CUSTOMS APPLICATION (Presentation Layer)</div>
+                  <div class="modules-grid-5">
+                    <div class="module-box" onclick="window.hubApp.switchTab('dashboard-pane')">
+                      <h5><i class="fa-solid fa-gauge"></i> Dashboard / Control Tower</h5>
+                      <p>&bull; KPIs & Trends &bull; Customs Status &bull; Finance & Logistics &bull; DO Alerts</p>
+                    </div>
+                    <div class="module-box" onclick="window.hubApp.switchTab('job-mgmt-pane')">
+                      <h5><i class="fa-solid fa-list-check"></i> Job Management</h5>
+                      <p>&bull; Search & Filter &bull; Timeline &bull; Document Summary &bull; Status Tracking</p>
+                    </div>
+                    <div class="module-box" onclick="window.hubApp.switchTab('doc-mgmt-pane')">
+                      <h5><i class="fa-solid fa-file-invoice"></i> Document Management</h5>
+                      <p>&bull; Upload Pre-alerts &bull; AI Parsing Viewer &bull; Confidence Scores &bull; Versioning</p>
+                    </div>
+                    <div class="module-box" onclick="window.hubApp.switchTab('workbench-pane')">
+                      <h5><i class="fa-solid fa-triangle-exclamation"></i> Exception Management</h5>
+                      <p>&bull; AI Exception Queue &bull; Validation Exceptions &bull; Review & Correct &bull; History</p>
+                    </div>
+                    <div class="module-box" onclick="window.hubApp.switchTab('rpa-pane')">
+                      <h5><i class="fa-solid fa-chart-line"></i> Monitoring & Reporting</h5>
+                      <p>&bull; Pipeline Health &bull; API Performance &bull; SLA / Cycle Time &bull; Audit Trail</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LAYER 3 -->
+                <div class="layer-card">
+                  <div class="layer-badge">3. APPLICATION SERVICES LAYER</div>
+                  <div class="services-grid-7">
+                    <div class="service-tag"><i class="fa-solid fa-route"></i> API Gateway</div>
+                    <div class="service-tag"><i class="fa-solid fa-diagram-next"></i> Workflow Engine</div>
+                    <div class="service-tag"><i class="fa-solid fa-scale-balanced"></i> Business Rules Engine</div>
+                    <div class="service-tag"><i class="fa-solid fa-bell"></i> Event & Notification Service</div>
+                    <div class="service-tag"><i class="fa-solid fa-folder-open"></i> Document Service</div>
+                    <div class="service-tag"><i class="fa-solid fa-id-badge"></i> Identity & Access Service</div>
+                    <div class="service-tag"><i class="fa-solid fa-file-waveform"></i> Audit & Logging Service</div>
+                  </div>
+                </div>
+
+                <!-- LAYER 4 -->
+                <div class="layer-card">
+                  <div class="layer-badge">4. UNIFIED DATA HUB (Central Mediation Layer)</div>
+                  <div class="hub-data-grid-5">
+                    <div class="data-store-box"><i class="fa-solid fa-database"></i> Master Data Store</div>
+                    <div class="data-store-box"><i class="fa-solid fa-table"></i> Transaction Data Store</div>
+                    <div class="data-store-box" style="border-color: var(--primary-accent);"><i class="fa-solid fa-bolt"></i> Event Bus (Real-time Events)</div>
+                    <div class="data-store-box"><i class="fa-solid fa-clock-rotate-left"></i> Workflow State Store</div>
+                    <div class="data-store-box"><i class="fa-solid fa-gear"></i> Integration Metadata</div>
+                  </div>
+                </div>
+
+                <!-- LAYER 5 -->
+                <div class="layer-card" style="border-color: var(--primary-accent);">
+                  <div class="layer-badge">5. CORE SYSTEM NODES (Backend Systems)</div>
+                  <div class="core-nodes-5-grid">
+                    <div class="node-card-diagram node-1">
+                      <div class="node-num">NODE 1</div>
+                      <h4>InCustoms AI</h4>
+                      <p class="node-sub">The Intake Engine</p>
+                      <div class="node-bullet">&bull; LayoutLM Multimodal AI</div>
+                      <div class="node-bullet">&bull; OCR & Token Extraction</div>
+                      <div class="node-bullet">&bull; AI Confidence Scoring</div>
+                    </div>
+                    <div class="node-card-diagram node-2">
+                      <div class="node-num">NODE 2</div>
+                      <h4>Home RPA</h4>
+                      <p class="node-sub">The Orchestrator</p>
+                      <div class="node-bullet">&bull; State Machine Engine</div>
+                      <div class="node-bullet">&bull; Business Rules Evaluation</div>
+                      <div class="node-bullet">&bull; Poller & Auto Triggers</div>
+                    </div>
+                    <div class="node-card-diagram node-3">
+                      <div class="node-num">NODE 3</div>
+                      <h4>VPLUS / LOT</h4>
+                      <p class="node-sub">The Core Record</p>
+                      <div class="node-bullet">&bull; Job Order Master Data</div>
+                      <div class="node-bullet">&bull; Customs Declaration Data</div>
+                      <div class="node-bullet">&bull; Source of Truth Ledger</div>
+                    </div>
+                    <div class="node-card-diagram node-4">
+                      <div class="node-num">NODE 4</div>
+                      <h4>UNO / eVoucher</h4>
+                      <p class="node-sub">Financial Gateway</p>
+                      <div class="node-bullet">&bull; Voucher Generation</div>
+                      <div class="node-bullet">&bull; Financial Settlement</div>
+                      <div class="node-bullet">&bull; Billing & Invoicing</div>
+                    </div>
+                    <div class="node-card-diagram node-5">
+                      <div class="node-num">NODE 5</div>
+                      <h4>TMS</h4>
+                      <p class="node-sub">Execution Arm</p>
+                      <div class="node-bullet">&bull; Transport Instruction (TI)</div>
+                      <div class="node-bullet">&bull; Fleet & Trucking Mgmt</div>
+                      <div class="node-bullet">&bull; POD Proof of Delivery</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LAYER 6 -->
+                <div class="layer-card">
+                  <div class="layer-badge">6. INTEGRATION & CONNECTIVITY LAYER</div>
+                  <div class="integration-bar">
+                    <span><i class="fa-solid fa-cloud-arrow-down"></i> Webhooks</span> &bull;
+                    <span><i class="fa-solid fa-code"></i> RESTful APIs</span> &bull;
+                    <span><i class="fa-solid fa-robot"></i> RPA Connectors</span> &bull;
+                    <span><i class="fa-solid fa-network-wired"></i> Message Broker (Kafka/RabbitMQ)</span> &bull;
+                    <span><i class="fa-solid fa-triangle-exclamation"></i> Error Handling / DLQ</span> &bull;
+                    <span><i class="fa-solid fa-file-arrow-up"></i> File / SFTP</span>
+                  </div>
+                </div>
+
+                <!-- LAYER 10 -->
+                <div class="layer-card" style="background: var(--primary-navy); color: white;">
+                  <div class="layer-badge" style="background: var(--primary-soft-blue); color: white;">10. END-TO-END AUTOMATED DATA LIFECYCLE</div>
+                  <div class="lifecycle-steps-diagram">
+                    <div class="ls-step">
+                      <span class="ls-num">1</span>
+                      <strong>Document Ingestion & AI Parsing</strong>
+                      <p>Pre-alert webhook received. AI parses & extracts data to structured JSON.</p>
+                    </div>
+                    <div class="ls-arrow">&rarr;</div>
+                    <div class="ls-step">
+                      <span class="ls-num">2</span>
+                      <strong>Rules Validation & Routing</strong>
+                      <p>Home RPA evaluates business rules, tariff & regulatory checks.</p>
+                    </div>
+                    <div class="ls-arrow">&rarr;</div>
+                    <div class="ls-step">
+                      <span class="ls-num">3</span>
+                      <strong>Central Ledger Inscription</strong>
+                      <p>Validated data posted to VPLUS/LOT core record via API.</p>
+                    </div>
+                    <div class="ls-arrow">&rarr;</div>
+                    <div class="ls-step">
+                      <span class="ls-num">4</span>
+                      <strong>Synchronous Split</strong>
+                      <p>When LOT = Finalized, RPA triggers parallel downstream API calls.</p>
+                    </div>
+                    <div class="ls-arrow">&rarr;</div>
+                    <div class="ls-step">
+                      <span class="ls-num">5A/5B</span>
+                      <strong>Financial (eVoucher) & Logistics (TMS)</strong>
+                      <p>eVoucher billing generated and Transport Instructions sent to TMS.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right Side Panel (Layers 7, 8, 9) -->
+              <div class="side-concerns-column">
+                
+                <div class="concern-box">
+                  <h4><i class="fa-solid fa-shield-halved"></i> 7. CROSS-CUTTING CONCERNS</h4>
+                  <ul>
+                    <li><strong>Security:</strong> NIK SSO, MFA, RBAC, Encryption, Session Mgmt</li>
+                    <li><strong>Compliance:</strong> End-to-End Audit Trail, Data Integrity Check</li>
+                    <li><strong>Observability:</strong> App/API Logs, Alerting & Metrics</li>
+                    <li><strong>Business Continuity:</strong> Backup, DR, High Availability</li>
+                    <li><strong>Foundation:</strong> Cloud/Hybrid, Containerized, Event-Driven</li>
+                  </ul>
+                </div>
+
+                <div class="concern-box">
+                  <h4><i class="fa-solid fa-database"></i> 8. DATA GOVERNANCE</h4>
+                  <ul>
+                    <li>Data Quality & Lineage</li>
+                    <li>Data Ownership & Access Control</li>
+                    <li>Metadata Management</li>
+                  </ul>
+                </div>
+
+                <div class="concern-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> 9. STANDARDS & PRINCIPLES</h4>
+                  <ul>
+                    <li>Single Entry, Multiple Use</li>
+                    <li>Data Entered Once</li>
+                    <li>Automated First & Secure by Design</li>
+                    <li>API First & Audit Everything</li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Load JS Modules -->
+  <script src="data.js"></script>
+  <script src="network-canvas.js"></script>
+  <script src="mfa-simulator.js"></script>
+  <script src="hscode-validator.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
